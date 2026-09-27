@@ -1,0 +1,19 @@
+SIH Satellite Super-Resolution
+Reduced-data rapid prototype
+
+Training samples: 240
+Validation samples: 30
+Test samples: 30
+Epochs: 6
+
+BICUBIC x4
+PSNR: 25.481593
+SSIM: 0.633438
+SAM: 0.034617
+Consistency: 0.003987
+
+FAST SEN2SWINSR x4
+PSNR: 24.321351
+SSIM: 0.494971
+SAM: 0.061661
+Consistency: 0.012440

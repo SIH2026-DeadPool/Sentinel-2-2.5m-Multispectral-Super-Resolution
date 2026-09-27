@@ -1,0 +1,8 @@
+<svg viewBox="0 0 1600 760" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="o" x2="0" y2="1"><stop stop-color="#0E5773"/><stop offset="1" stop-color="#02243D"/></linearGradient><linearGradient id="land" x2="1" y2="1"><stop stop-color="#214F48"/><stop offset="1" stop-color="#A5A271"/></linearGradient><filter id="texture"><feTurbulence baseFrequency=".014" numOctaves="3" seed="8" result="n"/><feBlend in="SourceGraphic" in2="n" mode="overlay"/></filter></defs>
+  <rect width="1600" height="760" fill="url(#o)"/><path d="M0 78C192 154 271 91 441 179c155 80 198 24 316 136 111 105 206 111 394 17 173-87 278-46 449 41V0H0v78Z" fill="#1AA6B5" opacity=".5"/>
+  <path d="M262 0c67 138 65 252 170 306 112 57 219-41 315 61 73 77 37 176 133 244 105 74 228 5 297 149H1600V225c-143 5-186-78-315-31-126 46-97 160-244 144-134-15-145-154-291-127-134 24-125 139-253 95C391 270 460 126 361 0H262Z" fill="url(#land)" filter="url(#texture)"/>
+  <path d="M412 0c42 118 53 191 146 235M562 194c83 89 161 118 271 101M785 368c50 42 87 94 91 171M1080 344c89 24 144 56 218 133M1237 510c46 46 86 109 137 172" stroke="#D4C893" stroke-opacity=".65" stroke-width="12" fill="none"/>
+  <g fill="#DCE5BD" opacity=".85"><circle cx="642" cy="236" r="11"/><circle cx="692" cy="263" r="8"/><circle cx="719" cy="232" r="12"/><circle cx="1061" cy="453" r="13"/><circle cx="1100" cy="480" r="9"/><circle cx="1138" cy="466" r="11"/><circle cx="1190" cy="521" r="8"/></g>
+  <g stroke="#80D7DF" stroke-width="3" opacity=".65"><path d="M0 520c209-64 365-44 549 23M1023 106c159 23 379 90 577 204M1306 587c92 19 173 68 294 131"/></g>
+</svg>

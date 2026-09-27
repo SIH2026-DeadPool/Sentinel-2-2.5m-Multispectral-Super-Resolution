@@ -1,0 +1,30 @@
+<svg viewBox="0 0 1200 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="metal" x1="300" y1="190" x2="700" y2="570" gradientUnits="userSpaceOnUse"><stop stop-color="#9EB8C8"/><stop offset=".28" stop-color="#263848"/><stop offset=".7" stop-color="#101D2A"/><stop offset="1" stop-color="#778E9A"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#102E58"/><stop offset=".5" stop-color="#071B38"/><stop offset="1" stop-color="#126F9A"/></linearGradient>
+    <radialGradient id="lens"><stop stop-color="#E9FFFF"/><stop offset=".22" stop-color="#47E7FF"/><stop offset=".68" stop-color="#0674B7"/><stop offset="1" stop-color="#031127"/></radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g transform="rotate(-9 600 410)">
+    <g opacity=".98">
+      <path d="M353 343L23 284v170l330 59V343Z" fill="url(#panel)" stroke="#20DFF9" stroke-width="4"/>
+      <path d="M844 341l345-59v170l-345 59V341Z" fill="url(#panel)" stroke="#20DFF9" stroke-width="4"/>
+      <g stroke="#3A99D4" stroke-width="2" opacity=".9"><path d="M83 296v171M144 307v171M205 318v171M266 328v171M327 339v171M905 331v171M966 321v171M1027 310v171M1088 300v171M1149 290v171"/><path d="M23 340l330 59M23 397l330 59M844 399l345-59M844 456l345-59"/></g>
+    </g>
+    <path d="M354 389h118M727 389h118" stroke="#43EAFB" stroke-width="18" filter="url(#glow)"/>
+    <path d="M370 222l279-72 194 144-77 294-303 53-153-210 60-209Z" fill="url(#metal)" stroke="#A7C6D3" stroke-width="6"/>
+    <path d="M464 250l165-44 113 83-43 105-179 37-93-80 37-101Z" fill="#1D2D3C" stroke="#637D8A" stroke-width="4"/>
+    <path d="M491 257l116-31M445 348l225-48M574 207l-24 211M650 258l-28 163" stroke="#7894A4" stroke-width="3" opacity=".75"/>
+    <path d="M456 475l275-56" stroke="#24E5FA" stroke-width="8" filter="url(#glow)"/>
+    <path d="M463 516l268-55" stroke="#23A6C5" stroke-width="4"/>
+    <path d="M543 180l-17-103 76-19 39 96" fill="url(#metal)" stroke="#9ABAC7" stroke-width="5"/>
+    <ellipse cx="558" cy="53" rx="81" ry="24" fill="#1A2C3A" stroke="#82A6B4" stroke-width="5" transform="rotate(17 558 53)"/>
+    <path d="M462 548c33 65 105 101 173 81 55-16 94-63 102-120l-275 39Z" fill="#0A1623" stroke="#8EADBA" stroke-width="6"/>
+    <circle cx="591" cy="590" r="88" fill="url(#lens)" stroke="#91EEFF" stroke-width="7" filter="url(#glow)"/>
+    <circle cx="591" cy="590" r="56" stroke="#A9FAFF" stroke-width="3" opacity=".72"/>
+    <circle cx="591" cy="590" r="27" fill="#DFFFFF"/>
+    <path d="M546 651l-115 303h321L638 641" fill="#11CBF5" fill-opacity=".16" stroke="#46E8FF" stroke-opacity=".66" stroke-width="3"/>
+    <path d="M481 840h232M510 757h172M535 690h121" stroke="#54EFFF" stroke-opacity=".48" stroke-width="2"/>
+    <g fill="#22EBFF" filter="url(#glow)"><rect x="412" y="290" width="23" height="23" rx="4"/><rect x="709" y="335" width="23" height="23" rx="4"/><rect x="441" y="428" width="23" height="23" rx="4"/></g>
+  </g>
+</svg>

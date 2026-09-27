@@ -1,0 +1,9 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#18CDED" stroke-opacity=".35" stroke-width="1.5">
+    <ellipse cx="1170" cy="395" rx="570" ry="180" stroke-dasharray="8 12"/>
+    <ellipse cx="1120" cy="470" rx="710" ry="290" transform="rotate(-7 1120 470)"/>
+    <path d="M250 820C620 430 1260 390 1835 665" stroke-dasharray="4 10"/>
+    <path d="M365 1000C815 587 1418 558 1860 810"/>
+  </g>
+  <g fill="#20DDF6"><circle cx="690" cy="504" r="5"/><circle cx="1393" cy="229" r="5"/><circle cx="1649" cy="414" r="4"/><circle cx="468" cy="785" r="4"/></g>
+</svg>

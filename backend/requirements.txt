@@ -1,0 +1,6 @@
+torch
+numpy
+rasterio
+fastapi
+uvicorn
+python-multipart
