@@ -5,6 +5,7 @@ import { MagneticButton } from './MagneticButton'
 type Props = {
   loaded: boolean
   fileName?: string
+  pngUrl?: string | null
   status?: string
   error?: string
   phase: 'idle' | 'uploading' | 'processing' | 'complete' | 'error'
@@ -13,11 +14,13 @@ type Props = {
   onSelect: (file: File | null) => void
   onRun: () => void
   onDownload: () => void
+  onDownloadTiff: () => void
 }
 
 export function WorkspaceDemo({
   loaded,
   fileName,
+  pngUrl,
   status,
   error,
   phase,
@@ -26,12 +29,13 @@ export function WorkspaceDemo({
   onSelect,
   onRun,
   onDownload,
+  onDownloadTiff,
 }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   const isActive = phase === 'uploading' || phase === 'processing'
   const primaryLabel = loaded
-    ? 'Download output'
+    ? '🖼️ Download Picture (.png)'
     : isActive
       ? phase === 'uploading' ? `Uploading ${uploadPercent}%` : 'Running model…'
       : fileName
@@ -64,6 +68,22 @@ export function WorkspaceDemo({
       <MagneticButton className="primary-action" onClick={loaded ? onDownload : onRun} disabled={isActive}>
         <span aria-hidden="true">✦</span> {primaryLabel} <span aria-hidden="true">→</span>
       </MagneticButton>
+      {loaded && pngUrl && (
+        <a
+          href={pngUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="secondary-action"
+          style={{ marginTop: '0.5rem', background: 'rgba(56, 189, 248, 0.15)', borderColor: '#38bdf8', color: '#38bdf8', textDecoration: 'none', textAlign: 'center', display: 'inline-block' }}
+        >
+          🔍 Open Picture Directly ↗
+        </a>
+      )}
+      {loaded && (
+        <button type="button" className="secondary-action" onClick={onDownloadTiff} style={{ marginTop: '0.5rem', opacity: 0.8 }}>
+          🌐 Download GeoTIFF (.tif)
+        </button>
+      )}
     </div>
     <p className={`status-text ${error ? 'error' : ''}`}>{error || status || 'Drop a .tif or .tiff here, or select a file to begin.'}</p>
     {isActive && <p className="progress-note" aria-live="polite">{phase === 'uploading' ? `Measured transfer: ${uploadPercent}%` : 'Transfer finished. The backend is processing the image; no fabricated percentage is shown.'}</p>}

@@ -148,3 +148,33 @@ def super_resolve_geotiff(
             )
 
         return memfile.read()
+
+
+def geotiff_to_png(tiff_bytes):
+    import io
+    from PIL import Image
+
+    with MemoryFile(tiff_bytes) as memfile:
+        with memfile.open() as src:
+            data = src.read()
+
+    # Extract True Color RGB: Red (B4 -> index 2), Green (B3 -> index 1), Blue (B2 -> index 0)
+    r = data[2]
+    g = data[1]
+    b = data[0]
+
+    rgb = np.stack([r, g, b], axis=-1)
+
+    p2, p98 = np.percentile(rgb, (2, 98))
+    if p98 > p2:
+        rgb_norm = np.clip((rgb - p2) / (p98 - p2), 0, 1)
+    else:
+        rgb_norm = np.clip(rgb / 3000.0, 0, 1)
+
+    rgb_uint8 = (rgb_norm * 255.0).astype(np.uint8)
+
+    img = Image.fromarray(rgb_uint8)
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    return buffer.getvalue()
+

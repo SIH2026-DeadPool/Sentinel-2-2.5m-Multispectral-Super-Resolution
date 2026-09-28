@@ -229,3 +229,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Sample test outputs
+sample_sentinel2_*.tif
+output_super_resolved.tif
+*.png
+!frontend/public/
+

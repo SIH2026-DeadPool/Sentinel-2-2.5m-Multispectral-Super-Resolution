@@ -146,8 +146,12 @@ a {
   transition: color 0.2s ease;
 }
 .desktop-nav a:hover,
-.desktop-nav button:hover {
+.desktop-nav button:hover,
+.desktop-nav button.active {
   color: var(--cyan);
+}
+.desktop-nav button.active::after {
+  transform: scaleX(1);
 }
 .desktop-nav a::after,
 .desktop-nav button::after {
@@ -155,12 +159,18 @@ a {
   right: 0;
   bottom: 0;
   left: 0;
-  height: 1px;
+  height: 2px;
   content: "";
   background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.22s ease;
+}
+.mobile-nav button.active {
+  color: var(--cyan);
+  border-left: 3px solid var(--cyan);
+  padding-left: 0.5rem;
 }
 .desktop-nav a:hover::after,
 .desktop-nav button:hover::after {

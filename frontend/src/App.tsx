@@ -11,7 +11,9 @@ const API_BASE_URL = (APP_ENV.env?.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000')
 
 function Scene() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [resultUrl, setResultUrl] = useState<string | null>(null)
+  const [resultPngBlob, setResultPngBlob] = useState<Blob | null>(null)
+  const [resultPngUrl, setResultPngUrl] = useState<string | null>(null)
+  const [resultTiffBlob, setResultTiffBlob] = useState<Blob | null>(null)
   const [phase, setPhase] = useState<'idle' | 'uploading' | 'processing' | 'complete' | 'error'>('idle')
   const [uploadPercent, setUploadPercent] = useState(0)
   const [status, setStatus] = useState('')
@@ -23,10 +25,12 @@ function Scene() {
   const compare = () => document.getElementById('compare')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
 
   const handleFileSelect = (file: File | null) => {
-    if (resultUrl) {
-      URL.revokeObjectURL(resultUrl)
-      setResultUrl(null)
+    if (resultPngUrl) {
+      URL.revokeObjectURL(resultPngUrl)
+      setResultPngUrl(null)
     }
+    setResultPngBlob(null)
+    setResultTiffBlob(null)
 
     if (!file) {
       setSelectedFile(null)
@@ -70,7 +74,7 @@ function Scene() {
     formData.append('file', selectedFile)
 
     const request = new XMLHttpRequest()
-    request.open('POST', `${API_BASE_URL}/predict`)
+    request.open('POST', `${API_BASE_URL}/predict-png`)
     request.responseType = 'blob'
     request.timeout = 15 * 60 * 1000
     request.upload.onprogress = (event) => {
@@ -80,7 +84,7 @@ function Scene() {
       const uploadMs = performance.now() - startedAt
       setTiming((current) => ({ ...current, uploadMs }))
       setPhase('processing')
-      setStatus('Upload complete. Running super-resolution…')
+      setStatus('Upload complete. Running super-resolution model…')
     }
     request.onload = () => {
       const serverProcessingMs = Number(request.getResponseHeader('X-Inference-Ms'))
@@ -101,21 +105,22 @@ function Scene() {
         return
       }
 
-      const blob = request.response as Blob
-      const nextUrl = URL.createObjectURL(blob)
+      const pngBlob = new Blob([request.response], { type: 'image/png' })
+      const pngUrl = URL.createObjectURL(pngBlob)
 
-      if (resultUrl) {
-        URL.revokeObjectURL(resultUrl)
+      if (resultPngUrl) {
+        URL.revokeObjectURL(resultPngUrl)
       }
 
-      setResultUrl(nextUrl)
+      setResultPngBlob(pngBlob)
+      setResultPngUrl(pngUrl)
       setTiming((current) => ({
         ...current,
         inputReadMs: Number.isFinite(serverInputReadMs) ? serverInputReadMs : undefined,
         processingMs: Number.isFinite(serverProcessingMs) ? serverProcessingMs : undefined,
       }))
       setPhase('complete')
-      setStatus('Super-resolution complete. Your TIFF is ready to download.')
+      setStatus('Super-resolution complete! Your PNG output picture is ready.')
       window.setTimeout(() => compare(), 120)
     }
     request.onerror = () => {
@@ -131,39 +136,115 @@ function Scene() {
     request.send(formData)
   }
 
-  const handleDownload = () => {
-    if (!resultUrl) {
-      return
+  const handleDownloadPng = (autoOpen = true) => {
+    if (!resultPngBlob && !resultPngUrl) return
+
+    const baseName = (selectedFile?.name ?? 'super_resolved').replace(/\.(tif|tiff)$/i, '')
+    const fileName = `${baseName}_sr.png`
+
+    const targetBlob = resultPngBlob || new Blob()
+    const url = URL.createObjectURL(targetBlob)
+
+    // Open image directly in new tab / browser photo viewer
+    if (autoOpen) {
+      window.open(url, '_blank')
     }
 
-    const link = document.createElement('a')
-    link.href = resultUrl
-    link.download = (selectedFile?.name ?? 'super_resolved.tif').replace(/\.(tif|tiff)$/i, '') + '_sr.tif'
-    link.click()
+    // Trigger download of PNG picture
+    const a = document.createElement('a')
+    a.style.display = 'none'
+    a.href = url
+    a.download = fileName
+    a.setAttribute('download', fileName)
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
   }
 
-  const loaded = Boolean(resultUrl)
+  const handleDownloadTiff = () => {
+    if (!selectedFile) return
+    const formData = new FormData()
+    formData.append('file', selectedFile)
+
+    const request = new XMLHttpRequest()
+    request.open('POST', `${API_BASE_URL}/predict`)
+    request.responseType = 'blob'
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 300) {
+        const tiffBlob = new Blob([request.response], { type: 'image/tiff' })
+        const url = URL.createObjectURL(tiffBlob)
+        const baseName = selectedFile.name.replace(/\.(tif|tiff)$/i, '')
+        const a = document.createElement('a')
+        a.style.display = 'none'
+        a.href = url
+        a.download = `${baseName}_sr.tif`
+        a.setAttribute('download', `${baseName}_sr.tif`)
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        setTimeout(() => URL.revokeObjectURL(url), 2000)
+      }
+    }
+    request.send(formData)
+  }
+
+  const [activeTab, setActiveTab] = useState<PageTab>('home')
+  const loaded = Boolean(resultPngUrl)
+
+  const handleNav = (tab: PageTab) => {
+    setActiveTab(tab)
+  }
 
   return <main id="top">
     <div className="space-bg" aria-hidden="true" /><div className="orbit-bg" aria-hidden="true" />
     <div className="page-frame">
-      <Header onLaunch={connect} onCompare={compare} />
-      <section className="hero" aria-labelledby="hero-title">
-        <motion.div className="hero-copy" initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .75, ease: 'easeOut' }}>
-          <p className="eyebrow hero-eyebrow"><span /> FASTSEN2SR · 4× SATELLITE IMAGERY ENHANCEMENT</p>
-          <h1 id="hero-title">See More.<br /><em>From Space.</em></h1>
-          <p className="hero-lead">Upload a Sentinel-2 GeoTIFF and generate a super-resolved 4× output using the FastSEN2SR model.</p>
-          <MagneticButton className="hero-cta" onClick={connect}>Launch Workspace <span aria-hidden="true">→</span></MagneticButton>
+      <Header activeTab={activeTab} onSelectTab={handleNav} />
+
+      {/* PAGE 1: HOME PAGE */}
+      {activeTab === 'home' && (
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <section className="hero" aria-labelledby="hero-title">
+            <motion.div className="hero-copy" initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .75, ease: 'easeOut' }}>
+              <p className="eyebrow hero-eyebrow"><span /> FASTSEN2SR · 4× SATELLITE IMAGERY ENHANCEMENT</p>
+              <h1 id="hero-title">See More.<br /><em>From Space.</em></h1>
+              <p className="hero-lead">Upload a Sentinel-2 GeoTIFF and generate a super-resolved 4× output using the FastSEN2SR model.</p>
+              <MagneticButton className="hero-cta" onClick={() => handleNav('workspace')}>Launch Workspace <span aria-hidden="true">→</span></MagneticButton>
+            </motion.div>
+            <motion.div className="hero-visual" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .12, duration: 1.1 }} aria-hidden="true">
+              <motion.img src="/visuals/hero-earth-satellite.png" alt="" animate={reduceMotion ? {} : { scale: [1.015, 1.035, 1.015] }} transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }} />
+            </motion.div>
+          </section>
+
+          <section className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', margin: '3rem 0' }}>
+            <div className="hud-card" style={{ padding: '1.75rem', background: 'rgba(13, 22, 40, 0.65)', border: '1px solid rgba(56, 189, 248, 0.2)', borderRadius: '12px' }}>
+              <h3 style={{ color: '#38bdf8', marginBottom: '0.5rem', fontSize: '1.25rem' }}>⚡ 4× Resolution Boost</h3>
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem' }}>Enhances Sentinel-2 10m/pixel multispectral bands up to 2.5m/pixel high-definition spatial resolution.</p>
+            </div>
+            <div className="hud-card" style={{ padding: '1.75rem', background: 'rgba(13, 22, 40, 0.65)', border: '1px solid rgba(56, 189, 248, 0.2)', borderRadius: '12px' }}>
+              <h3 style={{ color: '#38bdf8', marginBottom: '0.5rem', fontSize: '1.25rem' }}>📡 4 Multispectral Bands</h3>
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem' }}>Simultaneously processes B2 (Blue), B3 (Green), B4 (Red), and B8 (NIR) spectral bands.</p>
+            </div>
+            <div className="hud-card" style={{ padding: '1.75rem', background: 'rgba(13, 22, 40, 0.65)', border: '1px solid rgba(56, 189, 248, 0.2)', borderRadius: '12px' }}>
+              <h3 style={{ color: '#38bdf8', marginBottom: '0.5rem', fontSize: '1.25rem' }}>🖼️ Instant PNG & GeoTIFF</h3>
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem' }}>Download viewable PNG images for instant double-click viewing or raw GeoTIFF files for QGIS.</p>
+            </div>
+          </section>
         </motion.div>
-        <motion.div className="hero-visual" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .12, duration: 1.1 }} aria-hidden="true">
-          <motion.img src="/visuals/hero-earth-satellite.png" alt="" animate={reduceMotion ? {} : { scale: [1.015, 1.035, 1.015] }} transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }} />
-        </motion.div>
-      </section>
-      <section className="demo-section" aria-label="Interactive workspace demo">
-        <div className="showcase-grid">
+      )}
+
+      {/* PAGE 2: WORKSPACE PAGE */}
+      {activeTab === 'workspace' && (
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ paddingTop: '2rem' }}>
+          <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+            <p className="eyebrow"><span /> DEDICATED MODEL WORKSPACE</p>
+            <h1 style={{ fontSize: '2.5rem', color: '#fff' }}>Super-Resolution Processing Workspace</h1>
+            <p style={{ color: 'rgba(255,255,255,0.7)', maxWidth: '600px', margin: '0.5rem auto' }}>Upload your 4-band Sentinel-2 GeoTIFF file (.tif or .tiff) to run the 4× super-resolution neural model.</p>
+          </div>
           <WorkspaceDemo
             loaded={loaded}
             fileName={selectedFile?.name}
+            pngUrl={resultPngUrl}
             status={status}
             error={error}
             phase={phase}
@@ -171,13 +252,32 @@ function Scene() {
             timing={timing}
             onSelect={handleFileSelect}
             onRun={handleUpload}
-            onDownload={handleDownload}
+            onDownload={() => handleDownloadPng(true)}
+            onDownloadTiff={handleDownloadTiff}
           />
-          <ComparisonDemo active={loaded} />
-        </div>
-      </section>
-      <AboutSection />
-      <footer id="about-footer"><span>FASTSEN2SR</span><p>Visual foundation · Smart India Hackathon project presentation</p><div>⌄ Scroll to explore</div></footer>
+        </motion.div>
+      )}
+
+      {/* PAGE 3: COMPARE PAGE */}
+      {activeTab === 'compare' && (
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ paddingTop: '2rem' }}>
+          <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+            <p className="eyebrow"><span /> VISUAL COMPARISON DASHBOARD</p>
+            <h1 style={{ fontSize: '2.5rem', color: '#fff' }}>Resolution Enhancement Viewer</h1>
+            <p style={{ color: 'rgba(255,255,255,0.7)', maxWidth: '600px', margin: '0.5rem auto' }}>Compare original low-resolution Sentinel-2 input against the 4× enhanced super-resolution output picture.</p>
+          </div>
+          <ComparisonDemo active={true} pngUrl={resultPngUrl} />
+        </motion.div>
+      )}
+
+      {/* PAGE 4: ABOUT PAGE */}
+      {activeTab === 'about' && (
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ paddingTop: '2rem' }}>
+          <AboutSection />
+        </motion.div>
+      )}
+
+      <footer id="about-footer"><span>FASTSEN2SR</span><p>Visual foundation · Smart India Hackathon project presentation</p><div>FastSEN2SR Multi-Page App</div></footer>
     </div>
   </main>
 }
