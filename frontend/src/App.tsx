@@ -13,7 +13,6 @@ function Scene() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [resultPngBlob, setResultPngBlob] = useState<Blob | null>(null)
   const [resultPngUrl, setResultPngUrl] = useState<string | null>(null)
-  const [resultTiffBlob, setResultTiffBlob] = useState<Blob | null>(null)
   const [phase, setPhase] = useState<'idle' | 'uploading' | 'processing' | 'complete' | 'error'>('idle')
   const [uploadPercent, setUploadPercent] = useState(0)
   const [status, setStatus] = useState('')
@@ -21,7 +20,6 @@ function Scene() {
   const [timing, setTiming] = useState<{ uploadMs?: number; inputReadMs?: number; processingMs?: number }>({})
   const reduceMotion = useReducedMotion()
 
-  const connect = () => document.getElementById('workspace')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
   const compare = () => document.getElementById('compare')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
 
   const handleFileSelect = (file: File | null) => {
@@ -30,7 +28,6 @@ function Scene() {
       setResultPngUrl(null)
     }
     setResultPngBlob(null)
-    setResultTiffBlob(null)
 
     if (!file) {
       setSelectedFile(null)
@@ -189,6 +186,7 @@ function Scene() {
     request.send(formData)
   }
 
+  type PageTab = 'home' | 'workspace' | 'compare' | 'about'
   const [activeTab, setActiveTab] = useState<PageTab>('home')
   const loaded = Boolean(resultPngUrl)
 

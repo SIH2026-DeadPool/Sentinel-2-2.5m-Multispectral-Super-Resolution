@@ -4,3 +4,4 @@ rasterio
 fastapi
 uvicorn
 python-multipart
+Pillow
